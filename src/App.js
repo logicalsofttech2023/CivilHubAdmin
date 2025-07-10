@@ -73,9 +73,68 @@ import UpdateMainPowerCategoryList from "./Components/Pages/UpdateMainPowerCateg
 import MainPowerSubCategoryList from "./Components/Pages/MainPowerSubCategoryList";
 import BlogDetail from "./Components/Pages/BlogDetail";
 import TendorBlogDetail from "./Components/Pages/TendorBlogDetail";
+import AddAdminRole from "./Components/Pages/AddAdminRole";
+import UpdateAdminRole from "./Components/Pages/UpdateAdminRole";
+import AddSubAdmin from "./Components/Pages/AddSubAdmin";
+import UpdateSubAdmin from "./Components/Pages/UpdateSubAdmin";
+import SubAdminDetail from "./Components/Pages/SubAdminDetail";
+import FreelancerHeadline from "./Components/Pages/FreelancerHeadline";
+import BusinessHeadline from "./Components/Pages/BusinessHeadline";
+import CompanyHeadline from "./Components/Pages/CompanyHeadline";
+import IndividualHeadline from "./Components/Pages/IndividualHeadline";
+import FreelancerBenefit from "./Components/Pages/FreelancerBenefit";
+import BusinessCategory from "./Components/Pages/BusinessCategory";
+import UpdateBusinessCategory from "./Components/Pages/UpdateBusinessCategory";
+import WorkType from "./Components/Pages/WorkType";
+import UpdateWorkType from "./Components/Pages/UpdateWorkType";
+import TenderDepartment from "./Components/Pages/TenderDepartment";
+import UpdateTenderDepartment from "./Components/Pages/UpdateTenderDepartment";
+import FreelancerBlog from "./Components/Pages/FreelancerBlog";
+import UpdateFreelancerBlog from "./Components/Pages/UpdateFreelancerBlog";
+import BusinessBlog from "./Components/Pages/BusinessBlog";
+import UpdateBusinessBlog from "./Components/Pages/UpdateBusinessBlog";
+import CompanyBlog from "./Components/Pages/CompanyBlog";
+import UpdateCompanyBlog from "./Components/Pages/UpdateCompanyBlog";
+import IndividualBlog from "./Components/Pages/IndividualBlog";
+import UpdateIndividualBlog from "./Components/Pages/UpdateIndividualBlog";
+import UpdateFreelancerBenefit from "./Components/Pages/UpdateFreelancerBenefit";
+import UpdateBusinessBenefit from "./Components/Pages/UpdateBusinessBenefit";
+import BusinessBenefit from "./Components/Pages/BusinessBenefit";
+import CompanyBenefit from "./Components/Pages/CompanyBenefit";
+import UpdateCompanyBenefit from "./Components/Pages/UpdateCompanyBenefit";
+import IndividualBenefit from "./Components/Pages/IndividualBenefit";
+import UpdateIndividualBenefit from "./Components/Pages/UpdateIndividualBenefit";
+import FreelancerWork from "./Components/Pages/FreelancerWork";
+import UpdateFreelancerWork from "./Components/Pages/UpdateFreelancerWork";
+import ServiceSubCategory from "./Components/Pages/ServiceSubCategory";
+import UpdateServiceSubCategory from "./Components/Pages/UpdateServiceSubCategory";
+import TenderCategory from "./Components/Pages/TenderCategory";
+import UpdateTenderCategory from "./Components/Pages/UpdateTenderCategory";
+import TenderSubCategory from "./Components/Pages/TenderSubCategory";
+import UpdateTenderSubCategory from "./Components/Pages/UpdateTenderSubCategory";
+import JobPositionCategory from "./Components/Pages/JobPositionCategory";
+import UpdateJobPositionCategory from "./Components/Pages/UpdateJobPositionCategory";
+import BusinessWork from "./Components/Pages/BusinessWork";
+import CompanyWork from "./Components/Pages/CompanyWork";
+import IndividualWork from "./Components/Pages/IndividualWork";
+import JobPositionSubCategory from "./Components/Pages/JobPositionSubCategory";
+import UpdateJobPositionSubCategory from "./Components/Pages/UpdateJobPositionSubCategory";
+import ServiceProviderCategory from "./Components/Pages/ServiceProviderCategory";
+import UpdateServiceProviderCategory from "./Components/Pages/UpdateServiceProviderCategory";
+import ServiceProviderSubCategory from "./Components/Pages/ServiceProviderSubCategory";
+import UpdateServiceProviderSubCategory from "./Components/Pages/UpdateServiceProviderSubCategory";
+import ServiceProvider from "./Components/Pages/ServiceProvider";
+import AddServiceProvider from "./Components/Pages/AddServiceProvider";
+import UpdateServiceProvider from "./Components/Pages/UpdateServiceProvider";
+import UpdateBusinessWork from "./Components/Pages/UpdateBusinessWork";
+import UpdateCompanyWork from "./Components/Pages/UpdateCompanyWork";
+import UpdateIndividualWork from "./Components/Pages/UpdateIndividualWork";
+import WorkShopBanner from "./Components/Pages/WorkShopBanner";
+import UpdateWorkShopBanner from "./Components/Pages/UpdateWorkShopBanner";
+import ServiceList from "./Components/Pages/ServiceList";
+
 
 function App() {
-  const [randomResult, setRandomResult] = useState("hello");
 
   useEffect(() => {
     // Generate 8-digit random number
@@ -378,6 +437,307 @@ function App() {
         <Route
           path="/mainPowerSubCategoryList"
           element={<Protect ComponentName={MainPowerSubCategoryList} />}
+        ></Route>
+
+        <Route
+          path="/addAdminRole"
+          element={<Protect ComponentName={AddAdminRole} />}
+        ></Route>
+
+        <Route
+          path="/updateAdminRole"
+          element={<Protect ComponentName={UpdateAdminRole} />}
+        ></Route>
+
+        <Route
+          path="/addSubAdmin"
+          element={<Protect ComponentName={AddSubAdmin} />}
+        ></Route>
+
+        <Route
+          path="/updateSubAdmin"
+          element={<Protect ComponentName={UpdateSubAdmin} />}
+        ></Route>
+
+        <Route
+          path="/subAdminDetail"
+          element={<Protect ComponentName={SubAdminDetail} />}
+        ></Route>
+
+        <Route
+          path="/freelancerHeadline"
+          element={<Protect ComponentName={FreelancerHeadline} />}
+        ></Route>
+
+        <Route
+          path="/businessHeadline"
+          element={<Protect ComponentName={BusinessHeadline} />}
+        ></Route>
+
+        <Route
+          path="/companyHeadline"
+          element={<Protect ComponentName={CompanyHeadline} />}
+        ></Route>
+
+        <Route
+          path="/individualHeadline"
+          element={<Protect ComponentName={IndividualHeadline} />}
+        ></Route>
+
+        <Route
+          path="/freelancerBenefit"
+          element={<Protect ComponentName={FreelancerBenefit} />}
+        ></Route>
+
+        <Route
+          path="/businessCategory"
+          element={<Protect ComponentName={BusinessCategory} />}
+        ></Route>
+
+        <Route
+          path="/updateBusinessCategory"
+          element={<Protect ComponentName={UpdateBusinessCategory} />}
+        ></Route>
+
+        <Route
+          path="/serviceSubCategory"
+          element={<Protect ComponentName={ServiceSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/updateServiceSubCategory"
+          element={<Protect ComponentName={UpdateServiceSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/tenderCategory"
+          element={<Protect ComponentName={TenderCategory} />}
+        ></Route>
+
+
+        <Route
+          path="/updateTenderCategory"
+          element={<Protect ComponentName={UpdateTenderCategory} />}
+        ></Route>
+
+        <Route
+          path="/tenderSubCategory"
+          element={<Protect ComponentName={TenderSubCategory} />}
+        ></Route>
+
+
+        <Route
+          path="/updateTenderSubCategory"
+          element={<Protect ComponentName={UpdateTenderSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/workType"
+          element={<Protect ComponentName={WorkType} />}
+        ></Route>
+
+        <Route
+          path="/updateWorkType"
+          element={<Protect ComponentName={UpdateWorkType} />}
+        ></Route>
+
+         <Route
+          path="/tenderDepartment"
+          element={<Protect ComponentName={TenderDepartment} />}
+        ></Route>
+
+        <Route
+          path="/updateTenderDepartment"
+          element={<Protect ComponentName={UpdateTenderDepartment} />}
+        ></Route>
+
+        <Route
+          path="/freelancerBlog"
+          element={<Protect ComponentName={FreelancerBlog} />}
+        ></Route>
+
+        <Route
+          path="/updateFreelancerBlog"
+          element={<Protect ComponentName={UpdateFreelancerBlog} />}
+        ></Route>
+
+        <Route
+          path="/updateCompanyBlog"
+          element={<Protect ComponentName={UpdateCompanyBlog} />}
+        ></Route>
+
+        <Route
+          path="/updateBusinessBlog"
+          element={<Protect ComponentName={UpdateBusinessBlog} />}
+        ></Route>
+
+        <Route
+          path="/updateIndividualBlog"
+          element={<Protect ComponentName={UpdateIndividualBlog} />}
+        ></Route>
+
+        
+
+        <Route
+          path="/businessBlog"
+          element={<Protect ComponentName={BusinessBlog} />}
+        ></Route>
+
+        <Route
+          path="/companyBlog"
+          element={<Protect ComponentName={CompanyBlog} />}
+        ></Route>
+
+        <Route
+          path="/individualBlog"
+          element={<Protect ComponentName={IndividualBlog} />}
+        ></Route>
+
+         <Route
+          path="/updateFreelancerBenefit"
+          element={<Protect ComponentName={UpdateFreelancerBenefit} />}
+        ></Route>
+
+        <Route
+          path="/businessBenefit"
+          element={<Protect ComponentName={BusinessBenefit} />}
+        ></Route>
+
+        <Route
+          path="/updateBusinessBenefit"
+          element={<Protect ComponentName={UpdateBusinessBenefit} />}
+        ></Route>
+
+        <Route
+          path="/companyBenefit"
+          element={<Protect ComponentName={CompanyBenefit} />}
+        ></Route>
+
+
+        <Route
+          path="/updateCompanyBenefit"
+          element={<Protect ComponentName={UpdateCompanyBenefit} />}
+        ></Route>
+
+
+        <Route
+          path="/individualBenefit"
+          element={<Protect ComponentName={IndividualBenefit} />}
+        ></Route>
+
+        <Route
+          path="/updateIndividualBenefit"
+          element={<Protect ComponentName={UpdateIndividualBenefit} />}
+        ></Route>
+
+        <Route
+          path="/freelancerWork"
+          element={<Protect ComponentName={FreelancerWork} />}
+        ></Route>
+
+        <Route
+          path="/updateFreelancerWork"
+          element={<Protect ComponentName={UpdateFreelancerWork} />}
+        ></Route>
+
+        <Route
+          path="/businessWork"
+          element={<Protect ComponentName={BusinessWork} />}
+        ></Route>
+
+        <Route
+          path="/updateBusinessWork"
+          element={<Protect ComponentName={UpdateBusinessWork} />}
+        ></Route>
+
+        <Route
+          path="/companyWork"
+          element={<Protect ComponentName={CompanyWork} />}
+        ></Route>
+
+        <Route
+          path="/updateCompanyWork"
+          element={<Protect ComponentName={UpdateCompanyWork} />}
+        ></Route>
+
+        <Route
+          path="/individualWork"
+          element={<Protect ComponentName={IndividualWork} />}
+        ></Route>
+
+        <Route
+          path="/updateIndividualWork"
+          element={<Protect ComponentName={UpdateIndividualWork} />}
+        ></Route>
+
+        <Route
+          path="/jobPositionCategory"
+          element={<Protect ComponentName={JobPositionCategory} />}
+        ></Route>
+
+        <Route
+          path="/updateJobPositionCategory"
+          element={<Protect ComponentName={UpdateJobPositionCategory} />}
+        ></Route>
+
+        <Route
+          path="/jobPositionSubCategory"
+          element={<Protect ComponentName={JobPositionSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/updateJobPositionSubCategory"
+          element={<Protect ComponentName={UpdateJobPositionSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/serviceProviderCategory"
+          element={<Protect ComponentName={ServiceProviderCategory} />}
+        ></Route>
+
+        <Route
+          path="/updateServiceProviderCategory"
+          element={<Protect ComponentName={UpdateServiceProviderCategory} />}
+        ></Route>
+
+        <Route
+          path="/serviceProviderSubCategory"
+          element={<Protect ComponentName={ServiceProviderSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/updateServiceProviderSubCategory"
+          element={<Protect ComponentName={UpdateServiceProviderSubCategory} />}
+        ></Route>
+
+        <Route
+          path="/serviceProvider"
+          element={<Protect ComponentName={ServiceProvider} />}
+        ></Route>
+
+        <Route
+          path="/addServiceProvider"
+          element={<Protect ComponentName={AddServiceProvider} />}
+        ></Route>
+
+        <Route
+          path="/updateServiceProvider"
+          element={<Protect ComponentName={UpdateServiceProvider} />}
+        ></Route>
+
+        <Route
+          path="/workShopBanner"
+          element={<Protect ComponentName={WorkShopBanner} />}
+        ></Route>
+
+        <Route
+          path="/updateWorkShopBanner"
+          element={<Protect ComponentName={UpdateWorkShopBanner} />}
+        ></Route>
+
+        <Route
+          path="/serviceList"
+          element={<Protect ComponentName={ServiceList} />}
         ></Route>
 
         <Route path="/test" element={<Protect ComponentName={Test} />}></Route>

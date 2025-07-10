@@ -74,7 +74,6 @@ const AddTendor = () => {
   const [emdExemptionAllow, setEmdExemptionAllow] = useState(false);
   const [emdPercentage, setEmdPercentage] = useState();
   const [emdPayableAt, setEmdPayableAt] = useState();
-  const [organisationChain, setOrganisationChain] = useState();
   const [tendorReferenceNo, setTendorReferenceNo] = useState();
   const [tendorId, setTendorId] = useState();
   const [tendorType, setTendorType] = useState();
@@ -95,14 +94,11 @@ const AddTendor = () => {
   const [noOfCovers, setNoOfCovers] = useState();
   const [closeingDate, setCloseingDate] = useState();
   const [tendorAmmount, setTendorAmmount] = useState();
-  const [workItemType, setWorkItemType] = useState();
   const [preBidMeetingPlace, setPreBidMeetingPlace] = useState();
 
-  // File Upload States
-  const [featuredImage, setFeaturedImage] = useState(null);
 
-  // Replace individual states with arrays
-  // Initialize with one empty document for each type
+  
+  const [featuredImage, setFeaturedImage] = useState(null);
   const [nitDocuments, setNitDocuments] = useState([
     {
       nitDocFile: null,
@@ -110,7 +106,6 @@ const AddTendor = () => {
       nitSize: "",
     },
   ]);
-
   const [preBidDocuments, setPreBidDocuments] = useState([
     {
       preBidDocFile: null,
@@ -141,6 +136,12 @@ const AddTendor = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const [tenderCategoryList, setTenderCategoryList] = useState([]);
+  const [selectedTenderCategory, setSelectedTenderCategory] = useState("");
+
+  const [tenderSubCategoryList, setTenderSubCategoryList] = useState([]);
+  const [selectedTenderSubCategory, setSelectedTenderSubCategory] =
+    useState("");
 
   const validateStep = (stepNumber) => {
     const newErrors = {};
@@ -239,15 +240,15 @@ const AddTendor = () => {
     formData.append("tendor_ammount", tendorAmmount || "");
 
     // Additional Info
-    formData.append("organisation_chain", organisationChain || "");
+    // formData.append("organisation_chain", tenderCategory || "");
     formData.append("tendor_reference_no", tendorReferenceNo || "");
     formData.append("tendor_id", tendorId || "");
     formData.append("tendor_type", tendorType || "");
-    formData.append("tendor_category", tendorCategory || "");
+    formData.append("tendor_category", selectedTenderCategory || "");
     formData.append("payment_mode", paymentMode || "");
     formData.append("form_of_contract", formOfContract || "");
     formData.append("no_of_covers", noOfCovers || "");
-    formData.append("work_item_type", workItemType || "");
+    formData.append("tendor_sub_category", selectedTenderSubCategory || "");
     formData.append("pre_bid_meeting_place", preBidMeetingPlace || "");
 
     // File Uploads
@@ -338,7 +339,7 @@ const AddTendor = () => {
           toast.success(res.data.msg);
           setTimeout(() => {
             navigate("/tenderList");
-          })
+          });
         }
       })
       .catch((error) => {
@@ -349,22 +350,6 @@ const AddTendor = () => {
         setLoading(false);
       });
   };
-
-  // const handleFileChange = (e, setFile, setSize) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     setFile(file);
-
-  //     // Check size and format it properly
-  //     const sizeInKB = file.size / 1024;
-  //     if (sizeInKB > 1024) {
-  //       const sizeInMB = (sizeInKB / 1024).toFixed(2);
-  //       setSize(`${sizeInMB} MB`);
-  //     } else {
-  //       setSize(`${sizeInKB.toFixed(2)} KB`);
-  //     }
-  //   }
-  // };
 
   const renderFilePreview = (file, setFile, setSize = null) => {
     const fileUrl = file ? URL.createObjectURL(file) : "";
@@ -487,6 +472,50 @@ const AddTendor = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
+
+  const getAllTenderCategory = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_KEY}admin/api/all_tender_category`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setTenderCategoryList(response.data.data);
+        console.log(response.data.data);
+      }
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getAllTenderSubCategory = async (tenderCategoryId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_KEY}admin/api/tender_cate_by_subcategory/${tenderCategoryId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setTenderSubCategoryList(response.data.data);
+        console.log(response.data.data);
+      }
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAllTenderCategory();
+    getAllTenderSubCategory();
+  }, []);
 
   return (
     <div>
@@ -1612,7 +1641,6 @@ const AddTendor = () => {
                               variant="outlined"
                               component="label"
                               fullWidth
-                              
                               style={{ marginTop: "10px" }}
                             >
                               Upload Featured Image
@@ -1770,22 +1798,23 @@ const AddTendor = () => {
                             </div>
 
                             {/* Tender Metadata */}
-                            <div className="col-lg-6 mt-3">
+                            {/* <div className="col-lg-6 mt-3">
                               <TextField
                                 label="Organisation Chain"
-                                value={organisationChain}
+                                value={tenderCategory}
                                 onChange={(e) =>
-                                  setOrganisationChain(e.target.value)
+                                  setTenderCategory(e.target.value)
                                 }
                                 fullWidth
-                                error={!!errors.organisationChain}
+                                error={!!errors.tenderCategory}
                               />
-                              {errors.organisationChain && (
+                              {errors.tenderCategory && (
                                 <FormHelperText error>
-                                  {errors.organisationChain}
+                                  {errors.tenderCategory}
                                 </FormHelperText>
                               )}
-                            </div>
+                            </div> */}
+
                             <div className="col-lg-6 mt-3">
                               <TextField
                                 label="Tender Reference No."
@@ -1911,7 +1940,7 @@ const AddTendor = () => {
                                 </FormHelperText>
                               )}
                             </div>
-                            <div className="col-lg-6 mt-3">
+                            {/* <div className="col-lg-6 mt-3">
                               <TextField
                                 label="Work Item Type"
                                 value={workItemType}
@@ -1926,6 +1955,98 @@ const AddTendor = () => {
                                   {errors.workItemType}
                                 </FormHelperText>
                               )}
+                            </div> */}
+
+                            <div className="col-lg-6 mt-3">
+                              <FormControl
+                                fullWidth
+                                error={!!errors.tenderCategory}
+                                className="mt-3"
+                              >
+                                <InputLabel id="tender-category-label">
+                                  Tender Category
+                                </InputLabel>
+                                <Select
+                                  labelId="tender-category-label"
+                                  id="demo-simple-select"
+                                  value={selectedTenderCategory}
+                                  onChange={(e) => {
+                                    setSelectedTenderCategory(e.target.value);
+                                    getAllTenderSubCategory(e.target.value);
+                                  }}
+                                  label="Tender Category"
+                                  
+                                >
+                                 
+                                  {tenderCategoryList.length === 0 ? (
+                                    <MenuItem disabled>
+                                      Loading Tender Category...
+                                    </MenuItem>
+                                  ) : (
+                                    tenderCategoryList.map((department) => (
+                                      <MenuItem
+                                        key={department._id}
+                                        value={department._id}
+                                      >
+                                        {department.title}
+                                      </MenuItem>
+                                    ))
+                                  )}
+                                </Select>
+                                {errors.tenderCategory && (
+                                  <FormHelperText>
+                                    {errors.tenderCategory}
+                                  </FormHelperText>
+                                )}
+                              </FormControl>
+                            </div>
+
+                            <div className="col-lg-6 mt-3">
+                              <FormControl
+                                fullWidth
+                                error={!!errors.selectedTenderSubCategory}
+                                className="mt-3"
+                              >
+                                <InputLabel id="Tender-Sub-Category">
+                                  Tender Sub Category
+                                </InputLabel>
+                                <Select
+                                  labelId="Tender-Sub-Category"
+                                  value={selectedTenderSubCategory}
+                                  onChange={(e) =>
+                                    setSelectedTenderSubCategory(e.target.value)
+                                  }
+                                  label="Tender Sub Category"
+                                  
+                                >
+                                  <MenuItem selected disabled>
+                                    Select Tender Sub Category
+                                  </MenuItem>
+                                  {tenderSubCategoryList.length === 0 ? (
+                                    <MenuItem disabled>
+                                      Loading Tender Sub Category...
+                                    </MenuItem>
+                                  ) : (
+                                    tenderSubCategoryList.map(
+                                      (selectedTenderSubCategory) => (
+                                        <MenuItem
+                                          key={selectedTenderSubCategory._id}
+                                          value={
+                                            selectedTenderSubCategory._id
+                                          }
+                                        >
+                                          {selectedTenderSubCategory.title}
+                                        </MenuItem>
+                                      )
+                                    )
+                                  )}
+                                </Select>
+                                {errors.selectedTenderSubCategory && (
+                                  <FormHelperText>
+                                    {errors.selectedTenderSubCategory}
+                                  </FormHelperText>
+                                )}
+                              </FormControl>
                             </div>
                             <div className="col-lg-6 mt-3">
                               <TextField

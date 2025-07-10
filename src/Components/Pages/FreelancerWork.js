@@ -9,77 +9,72 @@ import toast, { Toaster } from "react-hot-toast";
 import Pagination from "react-js-pagination";
 import { ColorRing } from "react-loader-spinner";
 
-
-
-const JobCategory = () => {
+const FreelancerWork = () => {
   let navigate = useNavigate();
-  const [name, setname] = useState();
-  const [subjobcategory_image, setjobcetegory_image] = useState(null);
-  const [categorylist, setcategorylist] = useState([]);
-  const [filteredCategoryList, setFilteredCategoryList] = useState([]);
+  const [title, setTitle] = useState();
+  const [description, setDescription] = useState();
+  const [icon, setIcon] = useState(null);
+  const [dataList, setDataList] = useState([]);
+  const [dataFilterList, setDataFilterList] = useState([]);
   const [activePage, setActivePage] = useState(1);
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(true);
   const [count, setcount] = useState();
+  const [isSubmit, setIsSubmit] = useState(false);
 
   let token = secureLocalStorage.getItem("adminidtoken");
-  console.log(subjobcategory_image);
-  let deletebanner = () => {
-    swal({
-      title: "Are you sure?",
-      text: "Are you sure that you want to delete this banner?",
-      icon: "success",
-      dangerMode: true,
-    });
-  };
+
   useEffect(() => {
-    setFilteredCategoryList(categorylist);
-  }, [categorylist]);
-  let addcategorydata = () => {
+    setDataFilterList(dataList);
+  }, [dataList]);
+  let addData = () => {
     swal({
-      title: "Category added Successfully",
-      text: "Category inserted sucessfully",
+      title: "Data added Successfully",
+      text: "Data inserted sucessfully",
       icon: "success",
       buttons: true,
     });
   };
-  const categorydatahandle = (e) => {
+  const handleAddData = (e) => {
+    setIsSubmit(true);
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("image", subjobcategory_image);
-
+    const formData = {
+      title: title,
+      description: description,
+    };
     const options = {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
       },
     };
     axios
       .post(
-        `${process.env.REACT_APP_API_KEY}admin/api/admin_add_cate_job`,
+        `${process.env.REACT_APP_API_KEY}admin/api/AddFreelancerWork`,
         formData,
         options
       )
       .then((res) => {
-        toast.success(res?.data?.msg || "Cetegory Add Successfully");
-        addcategorydata();
-        getbannerlist();
+        toast.success(res?.data?.msg || "data Add Successfully");
+        addData();
+        getData();
+        setIcon(null);
+        setTitle("");
+        setDescription("");
       })
       .catch((error) => {
         console.log(error);
+      })
+      .finally(() => {
+        setIsSubmit(false);
       });
-
-    setjobcetegory_image(null);
-    setname("");
   };
 
   useEffect(() => {
-    getbannerlist();
+    getData();
   }, [0]);
 
-  let getbannerlist = () => {
+  let getData = () => {
     setLoading(true);
     const options = {
       headers: {
@@ -88,12 +83,12 @@ const JobCategory = () => {
     };
     axios
       .get(
-        `${process.env.REACT_APP_API_KEY}admin/api/admin_all_jobcate`,
+        `${process.env.REACT_APP_API_KEY}admin/api/getAllFreelancerWorks`,
         options
       )
       .then((res) => {
         setcount(res?.data?.data?.length);
-        setcategorylist(res.data.data);
+        setDataList(res.data.data);
       })
       .catch((error) => {
         console.log(error);
@@ -105,167 +100,86 @@ const JobCategory = () => {
 
   const handleFilter = (e) => {
     const searchTerm = e.target.value.toLowerCase();
-    const result = categorylist.filter(
+    const result = dataList.filter(
       (item) =>
         item.name?.toLowerCase().includes(searchTerm) ||
         item.category_frenchName?.toLowerCase().includes(searchTerm)
     );
-    setFilteredCategoryList(result);
+    setDataFilterList(result);
     setActivePage(1);
   };
   const handlePageChange = (pageNumber) => {
     setActivePage(pageNumber);
   };
 
-  let cetagoryedit = () => {
-    navigate("/updateJobCategory");
+  let editData = (id) => {
+    navigate("/updateFreelancerWork", { state: { id: id } });
   };
 
-  let deletesubcategory = (item) => {
+  let handleDeleteData = (item) => {
     swal({
       title: "Are you sure?",
-      text: "Once deleted, you will not be able to recover this category!",
+      text: "Once deleted, you will not be able to recover this data!",
       icon: "warning",
       buttons: true,
       dangerMode: true,
     }).then((willDelete) => {
       if (willDelete) {
-        let deletebannerimage = () => {
-          let bannerdata = {
-            jobcategoryId: item,
-          };
-
+        const deleteIcon = () => {
           const options = {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           };
+
           axios
-            .post(
-              `${process.env.REACT_APP_API_KEY}admin/api/admin_jobcate_delete`,
-              bannerdata,
+            .get(
+              `${process.env.REACT_APP_API_KEY}admin/api/deleteFreelancerWork?id=${item}`,
               options
             )
             .then((res) => {
-              getbannerlist();
+              getData();
+              swal("Poof! Your data has been deleted!", {
+                icon: "success",
+              });
             })
-            .catch((error) => {});
+            .catch((error) => {
+              console.log(error);
+              swal("Something went wrong!", {
+                icon: "error",
+              });
+            });
         };
-        deletebannerimage();
-        swal("Poof! Your category  has been deleted!", {
-          icon: "success",
-        });
+
+        deleteIcon();
       } else {
-        swal("Your category is safe!");
+        swal("Your data is safe!");
       }
     });
   };
-  const activedeactive = (item) => {
-    const Data = {
-      categoryId: item,
-    };
-    let options = {
-      hraders: {
-        token: token,
-      },
-    };
-    axios
-      .post(
-        `${process.env.REACT_APP_API_KEY}admin/api/activeDeactive_category`,
-        Data,
-        options
-      )
-      .then((res) => {
-        toast.success(res.data.message);
-        getbannerlist();
-      })
-      .catch((error) => {});
-  };
 
-  const renderCategoryData = (categorydata, index) => {
+  const renderData = (data, index) => {
     const adjustedIndex = (activePage - 1) * itemsPerPage + index + 1;
     return (
       <tr key={index}>
         <td>{adjustedIndex}</td>
-        <td className="text-center">
-          <Link
-            // to="/Customerdetails"
-            onClick={() => {
-              secureLocalStorage.setItem("customerid", categorydata?._id);
-            }}
-            className="title-color hover-c1 d-flex align-items-center gap-10"
-          >
-            {!categorydata?.image ? (
-              <img
-                src="bussiness-man.png"
-                className="avatar rounded-circle"
-                alt="default avatar"
-                width={40}
-              />
-            ) : (
-              <img
-                src={`${process.env.REACT_APP_API_KEY}uploads/admin/${categorydata?.image}`}
-                className="avatar rounded-circle"
-                alt="category avatar"
-                width={40}
-              />
-            )}
-          </Link>
-        </td>
-        <td>{categorydata?.name}</td>
-        <td>{new Date(categorydata?.updatedAt).toLocaleString()}</td>
-        {categorydata?.acrtive_status != 0 ? (
-          <td>
-            <form className="banner_status_form">
-              <input type="hidden" />
-              <input type="hidden" name="id" />
-              <label className="switcher">
-                <input
-                  type="checkbox"
-                  className="switcher_input"
-                  name="status"
-                  onChange={() => activedeactive(categorydata?._id)}
-                />
-                <span className="switcher_control" />
-              </label>
-            </form>
-          </td>
-        ) : (
-          <td>
-            <form className="banner_status_form">
-              <input type="hidden" />
-              <input type="hidden" name="id" />
-              <label className="switcher">
-                <input
-                  id="coupon_status9"
-                  name="status"
-                  defaultValue={1}
-                  defaultChecked
-                  type="checkbox"
-                  className="switcher_input"
-                  onChange={() => activedeactive(categorydata?._id)}
-                />
-                <span className="switcher_control" />
-              </label>
-            </form>
-          </td>
-        )}
+
+        <td>{data?.title}</td>
+        <td>{data?.description}</td>
+        <td>{new Date(data?.updatedAt).toLocaleString()}</td>
+
         <td>
           <div className="d-flex gap-10 justify-content-center">
             <span
               className="btn btn-outline--primary btn-sm cursor-pointer edit"
-              onClick={() => {
-                cetagoryedit(
-                  secureLocalStorage.setItem("categoryid", categorydata?._id)
-                );
-              }}
+              onClick={() => editData(data?._id)}
               title="Edit"
             >
               <i className="fa fa-pencil-square-o" aria-hidden="true" />
             </span>
             <a
               onClick={() => {
-                deletesubcategory(categorydata?._id);
+                handleDeleteData(data?._id);
               }}
               className="btn btn-outline-danger btn-sm cursor-pointer delete"
               title="Delete"
@@ -273,7 +187,7 @@ const JobCategory = () => {
             >
               <i
                 className="fa fa-trash-o"
-                onClick={deletesubcategory}
+                onClick={handleDeleteData}
                 aria-hidden="true"
               />
             </a>
@@ -285,7 +199,6 @@ const JobCategory = () => {
   return (
     <div>
       <Toaster />
-      {/* <Header /> */}
       <div
         className="container row"
         style={{ paddingLeft: "0px", paddingRight: "0px", marginLeft: "0px" }}
@@ -305,88 +218,64 @@ const JobCategory = () => {
                   src="https://6valley.6amtech.com/public/assets/back-end/img/brand-setup.png"
                   alt
                 />
-                Project Work Category
+                Freelancer Work
               </h2>
             </div>
             <div className="row">
               <div className="col-md-12">
                 <div className="card">
                   <div className="card-body" style={{ textAlign: "left" }}>
-                    <form onSubmit={categorydatahandle}>
+                    <form onSubmit={handleAddData}>
                       <div className="row">
-                        <div className="col-lg-6">
+                        <div className="col-lg-12">
                           <div>
                             <div className="form-group  lang_form">
                               <label className="title-color">
-                                Project Work Category Name
+                                Title
                                 <span className="text-danger">*</span>
                               </label>
                               <input
-                                value={name}
+                                value={title}
                                 onChange={(e) => {
-                                  setname(e.target.value);
+                                  setTitle(e.target.value);
                                 }}
                                 type="text"
                                 name="name[]"
                                 className="form-control"
-                                placeholder="New Category"
+                                placeholder="New Title"
                                 required
                               />
                             </div>
                           </div>
                         </div>
-                        <div className="col-lg-6">
-                          <div className="form-group  w-100">
-                            <center>
-                              {subjobcategory_image ? (
-                                <img
-                                  className="upload-img-view"
-                                  id="viewer"
-                                  src={URL.createObjectURL(
-                                    subjobcategory_image
-                                  )}
-                                  alt="image"
-                                />
-                              ) : (
-                                <img
-                                  className="upload-img-view"
-                                  id="viewer"
-                                  src="https://6valley.6amtech.com/public/assets/back-end/img/900x400/img1.jpg"
-                                  alt="image"
-                                />
-                              )}
-                            </center>
-                            <label className="title-color mt-3">
-                              Project Work Category Logo
-                            </label>
-                            <span className="text-info">
-                              <span className="text-danger">*</span>
-                            </span>
-                            <div className="form-control custom-file text-left">
-                              <input
-                                onChange={(e) => {
-                                  setjobcetegory_image(e.target.files[0]);
-                                }}
-                                type="file"
-                                name="image"
-                                className="custom-file-input"
-                                accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*"
-                                required
-                              />
 
-                              <label
-                                className="custom-file-label"
-                                htmlFor="customFileEg1"
-                              >
-                                Choose File
+                        <div className="col-lg-12">
+                          <div>
+                            <div className="form-group  lang_form">
+                              <label className="title-color">
+                                Description
+                                <span className="text-danger">*</span>
                               </label>
+
+                              <textarea
+                                type="text"
+                                className="form-control"
+                                placeholder="New Description"
+                                value={description}
+                                required
+                                onChange={(e) => setDescription(e.target.value)}
+                              />
                             </div>
                           </div>
                         </div>
                       </div>
                       <div className="d-flex flex-wrap gap-2 justify-content-end">
-                        <button type="submit" className="btn btn--primary">
-                          Submit
+                        <button
+                          type="submit"
+                          disabled={isSubmit}
+                          className="btn btn--primary"
+                        >
+                          {isSubmit ? "Adding..." : "Add"}
                         </button>
                       </div>
                     </form>
@@ -401,7 +290,7 @@ const JobCategory = () => {
                     <div className="row align-items-center">
                       <div className="col-sm-4 col-md-6 col-lg-8 mb-2 mb-sm-0">
                         <h5 className="text-capitalize d-flex gap-1">
-                          Project Work Category list
+                          Freelancer Work List
                           <span className="badge badge-soft-dark radius-50 fz-12">
                             {count}
                           </span>
@@ -446,7 +335,7 @@ const JobCategory = () => {
                           color="#e15b64"
                         />
                       </div>
-                    ) : filteredCategoryList.length > 0 ? (
+                    ) : dataFilterList.length > 0 ? (
                       <table
                         style={{ textAlign: "left" }}
                         className="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table w-100"
@@ -454,23 +343,19 @@ const JobCategory = () => {
                         <thead className="thead-light thead-50 text-capitalize">
                           <tr>
                             <th>Sr.No</th>
-                            <th className="text-center">Image</th>
-                            {/* <th>Main Category </th> */}
-                            <th>Project Work Category Name</th>
+                            <th>Title</th>
+                            <th>Description</th>
                             <th>Date/Time</th>
-                            <th>Status</th>
                             <th className="text-center">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredCategoryList
+                          {dataFilterList
                             .slice(
                               (activePage - 1) * itemsPerPage,
                               activePage * itemsPerPage
                             )
-                            .map((seller, index) =>
-                              renderCategoryData(seller, index)
-                            )}
+                            .map((seller, index) => renderData(seller, index))}
                         </tbody>
                       </table>
                     ) : (
@@ -486,12 +371,12 @@ const JobCategory = () => {
                       </div>
                     )}
 
-                    {!loading && filteredCategoryList.length > itemsPerPage && (
+                    {!loading && dataFilterList.length > itemsPerPage && (
                       <div className="d-flex justify-content-center mt-4">
                         <Pagination
                           activePage={activePage}
                           itemsCountPerPage={itemsPerPage}
-                          totalItemsCount={filteredCategoryList.length}
+                          totalItemsCount={dataFilterList.length}
                           pageRangeDisplayed={5}
                           onChange={handlePageChange}
                           itemClass="page-item"
@@ -519,4 +404,4 @@ const JobCategory = () => {
   );
 };
 
-export default JobCategory;
+export default FreelancerWork;

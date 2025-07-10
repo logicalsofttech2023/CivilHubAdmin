@@ -53,7 +53,11 @@ const AddFreelancer = () => {
   const [mobile, setMobile] = useState();
   const [accountType, setAccountType] = useState("Freelancer");
   const [profileImage, setProfileImage] = useState(null);
-  const [freelancerSubCategory, setFreelancerCategoryList] = useState([]);
+
+  const [freelancerCategory, setFreelancerCategoryList] = useState([]);
+  const [freelancerCategoryId, setFreelancerCategoryId] = useState([]);
+
+  const [freelancerSubCategory, setFreelancerSubCategoryList] = useState([]);
   const [freelancerSubCategoryId, setFreelancerSubCategoryId] = useState([]);
   const [skillsList, setSkillsList] = useState([]);
   const [skillIds, setSkillIds] = useState([]);
@@ -96,6 +100,7 @@ const AddFreelancer = () => {
     data.append("address", address);
     data.append("mobile", mobile);
     data.append("account_type", accountType);
+    freelancerCategoryId.forEach((id) => data.append("categoryId[]", id));
     freelancerSubCategoryId.forEach((id) => data.append("subcategoryId[]", id));
 
     data.append("skills", skillIds);
@@ -147,6 +152,26 @@ const AddFreelancer = () => {
       )
       .then((res) => {
         setFreelancerCategoryList(res.data.data);
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+  };
+
+  let getFreelancerSubCategoryList = (categoryIds) => {
+    const options = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    axios
+      .post(
+        `${process.env.REACT_APP_API_KEY}admin/api/getSubcategoriesByCategoryIds`,
+        { categoryIds },
+        options
+      )
+      .then((res) => {
+        setFreelancerSubCategoryList(res.data.data);
       })
       .catch((error) => {
         console.log("error", error);
@@ -434,25 +459,73 @@ const AddFreelancer = () => {
                           <FormControl
                             fullWidth
                             margin="normal"
+                            error={!!errors.freelancerCategoryId}
+                          >
+                            <InputLabel id="freelancer-category-label">
+                              Category
+                            </InputLabel>
+                            <Select
+                              labelId="freelancer-category-label"
+                              id="freelancer-category"
+                              multiple
+                              value={freelancerCategoryId}
+                              onChange={(e) => {
+                                const selectedIds = e.target.value;
+                                setFreelancerCategoryId(selectedIds);
+                                getFreelancerSubCategoryList(selectedIds);
+                              }}
+                              name="freelancerCategoryId"
+                              label="Category"
+                              renderValue={(selected) =>
+                                freelancerCategory
+                                  ?.filter((cat) => selected.includes(cat._id))
+                                  .map((cat) => cat.name)
+                                  .join(", ")
+                              }
+                            >
+                              {freelancerCategory?.map((cat) => (
+                                <MenuItem key={cat._id} value={cat._id}>
+                                  <Checkbox
+                                    checked={freelancerCategoryId.includes(
+                                      cat._id
+                                    )}
+                                  />
+                                  <ListItemText primary={cat.name} />
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            {errors.freelancerCategoryId && (
+                              <FormHelperText error>
+                                {errors.freelancerCategoryId}
+                              </FormHelperText>
+                            )}
+                          </FormControl>
+                        </div>
+
+                        <div className="col-lg-12">
+                          <FormControl
+                            fullWidth
+                            margin="normal"
                             error={!!errors.freelancerSubCategoryId}
                           >
-                            <InputLabel id="freelancer-subcategory-label">
+                            <InputLabel id="freelancer-Sub-category-label">
                               Sub Category
                             </InputLabel>
                             <Select
-                              labelId="freelancer-subcategory-label"
-                              id="freelancer-subcategory"
+                              labelId="freelancer-Sub-category-label"
+                              id="freelancer-Sub-category"
                               multiple
                               value={freelancerSubCategoryId}
-                              onChange={(e) =>
-                                setFreelancerSubCategoryId(e.target.value)
-                              }
+                              onChange={(e) => {
+                                const selectedIds = e.target.value;
+                                setFreelancerSubCategoryId(selectedIds);
+                              }}
                               name="freelancerSubCategoryId"
                               label="Sub Category"
                               renderValue={(selected) =>
                                 freelancerSubCategory
                                   ?.filter((cat) => selected.includes(cat._id))
-                                  .map((cat) => cat.name)
+                                  .map((cat) => cat.sub_cate_name)
                                   .join(", ")
                               }
                             >
@@ -463,7 +536,7 @@ const AddFreelancer = () => {
                                       cat._id
                                     )}
                                   />
-                                  <ListItemText primary={cat.name} />
+                                  <ListItemText primary={cat.sub_cate_name} />
                                 </MenuItem>
                               ))}
                             </Select>

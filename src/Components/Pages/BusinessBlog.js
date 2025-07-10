@@ -4,51 +4,53 @@ import swal from "sweetalert";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebarr from "../Sidebar";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import secureLocalStorage from "react-secure-storage";
 import toast, { Toaster } from "react-hot-toast";
 import Pagination from "react-js-pagination";
 import { ColorRing } from "react-loader-spinner";
+import Editor from "./Editor";
 
-
-
-const JobCategory = () => {
+const BusinessBlog = () => {
   let navigate = useNavigate();
-  const [name, setname] = useState();
-  const [subjobcategory_image, setjobcetegory_image] = useState(null);
-  const [categorylist, setcategorylist] = useState([]);
-  const [filteredCategoryList, setFilteredCategoryList] = useState([]);
+  const [title, setTitle] = useState();
+  const [text, setText] = useState();
+  const [date, setDate] = useState();
+  const [othername, setOthername] = useState();
+  const [blogImage, setBlogImage] = useState(null);
+  const [blogsList, setBlogsList] = useState([]);
+  const [filterBlogsList, setFilterBlogsList] = useState([]);
   const [activePage, setActivePage] = useState(1);
-  const itemsPerPage = 10;
-  const [loading, setLoading] = useState(true);
-  const [count, setcount] = useState();
+  const itemsPerPage = 5;
+  const [count, setCount] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   let token = secureLocalStorage.getItem("adminidtoken");
-  console.log(subjobcategory_image);
-  let deletebanner = () => {
-    swal({
-      title: "Are you sure?",
-      text: "Are you sure that you want to delete this banner?",
-      icon: "success",
-      dangerMode: true,
-    });
-  };
+
   useEffect(() => {
-    setFilteredCategoryList(categorylist);
-  }, [categorylist]);
-  let addcategorydata = () => {
+    setFilterBlogsList(blogsList);
+  }, [blogsList]);
+
+  let addBlogData = () => {
     swal({
-      title: "Category added Successfully",
-      text: "Category inserted sucessfully",
+      title: "Blog added Successfully",
+      text: "Blog inserted sucessfully",
       icon: "success",
       buttons: true,
     });
   };
-  const categorydatahandle = (e) => {
+  const handleAddBlog = (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("image", subjobcategory_image);
+    formData.append("title", title);
+    formData.append("description", text);
+    formData.append("date", date);
+    formData.append("other_name", othername);
+    formData.append("image", blogImage);
 
     const options = {
       headers: {
@@ -56,30 +58,33 @@ const JobCategory = () => {
         "Content-Type": "multipart/form-data",
       },
     };
+
     axios
       .post(
-        `${process.env.REACT_APP_API_KEY}admin/api/admin_add_cate_job`,
+        `${process.env.REACT_APP_API_KEY}admin/api/add_bussiness_blog`,
         formData,
         options
       )
       .then((res) => {
-        toast.success(res?.data?.msg || "Cetegory Add Successfully");
-        addcategorydata();
-        getbannerlist();
+        console.log(res);
+        toast.success(res?.data?.msg || "Blog Added Successfully");
+        addBlogData();
+        getAllBlogs();
       })
       .catch((error) => {
         console.log(error);
+        toast.error("Something went wrong");
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-
-    setjobcetegory_image(null);
-    setname("");
   };
 
   useEffect(() => {
-    getbannerlist();
+    getAllBlogs();
   }, [0]);
 
-  let getbannerlist = () => {
+  let getAllBlogs = () => {
     setLoading(true);
     const options = {
       headers: {
@@ -87,16 +92,15 @@ const JobCategory = () => {
       },
     };
     axios
-      .get(
-        `${process.env.REACT_APP_API_KEY}admin/api/admin_all_jobcate`,
-        options
-      )
+      .get(`${process.env.REACT_APP_API_KEY}admin/api/all_bussiness_blog`, options)
       .then((res) => {
-        setcount(res?.data?.data?.length);
-        setcategorylist(res.data.data);
+        console.log(res);
+        setCount(res?.data?.data?.length);
+        setBlogsList(res.data.data);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("error", error);
+        toast.error("Something went wrong");
       })
       .finally(() => {
         setLoading(false);
@@ -105,34 +109,38 @@ const JobCategory = () => {
 
   const handleFilter = (e) => {
     const searchTerm = e.target.value.toLowerCase();
-    const result = categorylist.filter(
+    const result = blogsList.filter(
       (item) =>
         item.name?.toLowerCase().includes(searchTerm) ||
         item.category_frenchName?.toLowerCase().includes(searchTerm)
     );
-    setFilteredCategoryList(result);
+    setFilterBlogsList(result);
     setActivePage(1);
   };
   const handlePageChange = (pageNumber) => {
     setActivePage(pageNumber);
   };
 
-  let cetagoryedit = () => {
-    navigate("/updateJobCategory");
+  const handleBlogEdit = (blogId) => {
+    navigate("/updateBusinessBlog", {
+      state: {
+        blogId: blogId,
+      },
+    });
   };
 
-  let deletesubcategory = (item) => {
+  let handleDeleteBlog = (item) => {
     swal({
       title: "Are you sure?",
-      text: "Once deleted, you will not be able to recover this category!",
+      text: "Once deleted, you will not be able to recover this blog!",
       icon: "warning",
       buttons: true,
       dangerMode: true,
     }).then((willDelete) => {
       if (willDelete) {
-        let deletebannerimage = () => {
+        let handleDeleteBlogImage = () => {
           let bannerdata = {
-            jobcategoryId: item,
+            blogId: item,
           };
 
           const options = {
@@ -141,22 +149,25 @@ const JobCategory = () => {
             },
           };
           axios
-            .post(
-              `${process.env.REACT_APP_API_KEY}admin/api/admin_jobcate_delete`,
-              bannerdata,
+            .get(
+              `${process.env.REACT_APP_API_KEY}admin/api/bussiness_blog_delete/${item}`,
+              
               options
             )
             .then((res) => {
-              getbannerlist();
+              getAllBlogs();
             })
-            .catch((error) => {});
+            .catch((error) => {
+              console.log("error", error);
+              toast.error("Something went wrong");
+            });
         };
-        deletebannerimage();
-        swal("Poof! Your category  has been deleted!", {
+        handleDeleteBlogImage();
+        swal("Poof! Your blog  has been deleted!", {
           icon: "success",
         });
       } else {
-        swal("Your category is safe!");
+        swal("Your blog is safe!");
       }
     });
   };
@@ -177,12 +188,15 @@ const JobCategory = () => {
       )
       .then((res) => {
         toast.success(res.data.message);
-        getbannerlist();
+        getAllBlogs();
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.log("error", error);
+        toast.error("Something went wrong");
+      });
   };
 
-  const renderCategoryData = (categorydata, index) => {
+  const renderBlogData = (data, index) => {
     const adjustedIndex = (activePage - 1) * itemsPerPage + index + 1;
     return (
       <tr key={index}>
@@ -191,11 +205,11 @@ const JobCategory = () => {
           <Link
             // to="/Customerdetails"
             onClick={() => {
-              secureLocalStorage.setItem("customerid", categorydata?._id);
+              secureLocalStorage.setItem("customerid", data?._id);
             }}
             className="title-color hover-c1 d-flex align-items-center gap-10"
           >
-            {!categorydata?.image ? (
+            {!data?.image ? (
               <img
                 src="bussiness-man.png"
                 className="avatar rounded-circle"
@@ -204,7 +218,7 @@ const JobCategory = () => {
               />
             ) : (
               <img
-                src={`${process.env.REACT_APP_API_KEY}uploads/admin/${categorydata?.image}`}
+                src={`${process.env.REACT_APP_API_KEY}uploads/admin/${data?.image}`}
                 className="avatar rounded-circle"
                 alt="category avatar"
                 width={40}
@@ -212,9 +226,12 @@ const JobCategory = () => {
             )}
           </Link>
         </td>
-        <td>{categorydata?.name}</td>
-        <td>{new Date(categorydata?.updatedAt).toLocaleString()}</td>
-        {categorydata?.acrtive_status != 0 ? (
+        <td>{data?.title}</td>
+        <td>{data?.description.replace(/<\/?[^>]*>?/g, "").slice(0, 20)}</td>
+        <td>{data?.other_name}</td>
+        <td>{data?.date}</td>
+        <td>{new Date(data?.updatedAt).toLocaleString()}</td>
+        {data?.acrtive_status != 0 ? (
           <td>
             <form className="banner_status_form">
               <input type="hidden" />
@@ -224,7 +241,7 @@ const JobCategory = () => {
                   type="checkbox"
                   className="switcher_input"
                   name="status"
-                  onChange={() => activedeactive(categorydata?._id)}
+                  onChange={() => activedeactive(data?._id)}
                 />
                 <span className="switcher_control" />
               </label>
@@ -243,7 +260,7 @@ const JobCategory = () => {
                   defaultChecked
                   type="checkbox"
                   className="switcher_input"
-                  onChange={() => activedeactive(categorydata?._id)}
+                  onChange={() => activedeactive(data?._id)}
                 />
                 <span className="switcher_control" />
               </label>
@@ -255,17 +272,15 @@ const JobCategory = () => {
             <span
               className="btn btn-outline--primary btn-sm cursor-pointer edit"
               onClick={() => {
-                cetagoryedit(
-                  secureLocalStorage.setItem("categoryid", categorydata?._id)
-                );
+                handleBlogEdit(data?._id);
               }}
               title="Edit"
             >
               <i className="fa fa-pencil-square-o" aria-hidden="true" />
             </span>
-            <a
+            <Link
               onClick={() => {
-                deletesubcategory(categorydata?._id);
+                handleDeleteBlog(data?._id);
               }}
               className="btn btn-outline-danger btn-sm cursor-pointer delete"
               title="Delete"
@@ -273,10 +288,19 @@ const JobCategory = () => {
             >
               <i
                 className="fa fa-trash-o"
-                onClick={deletesubcategory}
+                onClick={handleDeleteBlog}
                 aria-hidden="true"
               />
-            </a>
+            </Link>
+
+            <Link
+              to="/blogDetail"
+              state={{ blogId: data._id }}
+              title="View"
+              className="btn btn-outline-info btn-sm square-btn"
+            >
+              <i className="fa fa-eye" aria-hidden="true"></i>
+            </Link>
           </div>
         </td>
       </tr>
@@ -305,46 +329,102 @@ const JobCategory = () => {
                   src="https://6valley.6amtech.com/public/assets/back-end/img/brand-setup.png"
                   alt
                 />
-                Project Work Category
+                Blogs
               </h2>
             </div>
             <div className="row">
               <div className="col-md-12">
                 <div className="card">
                   <div className="card-body" style={{ textAlign: "left" }}>
-                    <form onSubmit={categorydatahandle}>
+                    <form onSubmit={handleAddBlog}>
+                      <div className="row">
+                        <div className="card-body">
+                          <div className="form-group">
+                            <div className="row">
+                              <div className="col-md-12 col-lg-12 col-xxl-12 col-lx-12">
+                                <div className="form-group mb-3">
+                                  <label
+                                    htmlFor="name"
+                                    className="title-color text-capitalize"
+                                  >
+                                    Title
+                                  </label>
+                                  <textarea
+                                    type="text"
+                                    className="form-control"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-12 col-lg-12 col-xxl-12 col-lx-12">
+                                <div className="form-group mb-3">
+                                  <label
+                                    htmlFor="name"
+                                    className="title-color text-capitalize"
+                                  >
+                                    Description
+                                  </label>
+                                  <Editor value={text} onChange={setText} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <div className="row">
                         <div className="col-lg-6">
                           <div>
                             <div className="form-group  lang_form">
                               <label className="title-color">
-                                Project Work Category Name
+                                Blogs Date
                                 <span className="text-danger">*</span>
                               </label>
                               <input
-                                value={name}
+                                value={date}
                                 onChange={(e) => {
-                                  setname(e.target.value);
+                                  setDate(e.target.value);
                                 }}
-                                type="text"
+                                type="date"
                                 name="name[]"
                                 className="form-control"
-                                placeholder="New Category"
+                                placeholder="Enter Date"
                                 required
                               />
                             </div>
                           </div>
                         </div>
                         <div className="col-lg-6">
+                          <div>
+                            <div className="form-group  lang_form">
+                              <label className="title-color">
+                                Auther Name
+                                <span className="text-danger">*</span>
+                              </label>
+                              <input
+                                value={othername}
+                                onChange={(e) => {
+                                  setOthername(e.target.value);
+                                }}
+                                type="text"
+                                name="name[]"
+                                className="form-control"
+                                placeholder="Enter Name"
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-lg-6">
                           <div className="form-group  w-100">
                             <center>
-                              {subjobcategory_image ? (
+                              {blogImage ? (
                                 <img
                                   className="upload-img-view"
                                   id="viewer"
-                                  src={URL.createObjectURL(
-                                    subjobcategory_image
-                                  )}
+                                  src={URL.createObjectURL(blogImage)}
                                   alt="image"
                                 />
                               ) : (
@@ -357,7 +437,7 @@ const JobCategory = () => {
                               )}
                             </center>
                             <label className="title-color mt-3">
-                              Project Work Category Logo
+                              Blogs Logo
                             </label>
                             <span className="text-info">
                               <span className="text-danger">*</span>
@@ -365,7 +445,7 @@ const JobCategory = () => {
                             <div className="form-control custom-file text-left">
                               <input
                                 onChange={(e) => {
-                                  setjobcetegory_image(e.target.files[0]);
+                                  setBlogImage(e.target.files[0]);
                                 }}
                                 type="file"
                                 name="image"
@@ -385,8 +465,12 @@ const JobCategory = () => {
                         </div>
                       </div>
                       <div className="d-flex flex-wrap gap-2 justify-content-end">
-                        <button type="submit" className="btn btn--primary">
-                          Submit
+                        <button
+                          type="submit"
+                          className="btn btn--primary"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? "Submitting..." : "Submit"}
                         </button>
                       </div>
                     </form>
@@ -401,7 +485,7 @@ const JobCategory = () => {
                     <div className="row align-items-center">
                       <div className="col-sm-4 col-md-6 col-lg-8 mb-2 mb-sm-0">
                         <h5 className="text-capitalize d-flex gap-1">
-                          Project Work Category list
+                          Blogs list
                           <span className="badge badge-soft-dark radius-50 fz-12">
                             {count}
                           </span>
@@ -446,7 +530,7 @@ const JobCategory = () => {
                           color="#e15b64"
                         />
                       </div>
-                    ) : filteredCategoryList.length > 0 ? (
+                    ) : filterBlogsList.length > 0 ? (
                       <table
                         style={{ textAlign: "left" }}
                         className="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table w-100"
@@ -455,21 +539,23 @@ const JobCategory = () => {
                           <tr>
                             <th>Sr.No</th>
                             <th className="text-center">Image</th>
-                            {/* <th>Main Category </th> */}
-                            <th>Project Work Category Name</th>
-                            <th>Date/Time</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Author Name</th>
+                            <th>Date</th>
+                            <th>Create Date</th>
                             <th>Status</th>
                             <th className="text-center">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredCategoryList
+                          {filterBlogsList
                             .slice(
                               (activePage - 1) * itemsPerPage,
                               activePage * itemsPerPage
                             )
                             .map((seller, index) =>
-                              renderCategoryData(seller, index)
+                              renderBlogData(seller, index)
                             )}
                         </tbody>
                       </table>
@@ -481,24 +567,24 @@ const JobCategory = () => {
                           alt="Image Description"
                         />
                         <p className="mb-0 order-stats__subtitle">
-                          No Category found
+                          No Blogs found
                         </p>
                       </div>
                     )}
 
-                    {!loading && filteredCategoryList.length > itemsPerPage && (
-                      <div className="d-flex justify-content-center mt-4">
+                    <div className="d-flex justify-content-center mt-4">
+                      {filterBlogsList.length > itemsPerPage && (
                         <Pagination
                           activePage={activePage}
                           itemsCountPerPage={itemsPerPage}
-                          totalItemsCount={filteredCategoryList.length}
+                          totalItemsCount={filterBlogsList.length}
                           pageRangeDisplayed={5}
                           onChange={handlePageChange}
                           itemClass="page-item"
                           linkClass="page-link"
                         />
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
                   <div className="table-responsive mt-4">
@@ -519,4 +605,4 @@ const JobCategory = () => {
   );
 };
 
-export default JobCategory;
+export default BusinessBlog;

@@ -6,11 +6,8 @@ import secureLocalStorage from "react-secure-storage";
 import toast, { Toaster } from "react-hot-toast";
 
 const Login = () => {
-
-
   let [passwordtype, setpasswordtype] = useState("password");
   let [iconstatus, seticonstatus] = useState(false);
-
 
   const [adminemail, setadminemail] = useState("");
   const [adminpassword, setadminpassword] = useState("");
@@ -24,18 +21,17 @@ const Login = () => {
       password: adminpassword,
     };
     axios
-      .post(`${process.env.REACT_APP_API_KEY}admin/api/admin_login`, userdata)
+      .post(`${process.env.REACT_APP_API_KEY}admin/api/loginAdmin`, userdata)
       .then((response) => {
-        secureLocalStorage.setItem("adminid", response.data.data._id); 
+        console.log(response);
+        secureLocalStorage.setItem("adminid", response.data.admin._id);
         secureLocalStorage.setItem("adminidtoken", response.data.token);
-        secureLocalStorage.setItem("adminemail", response.data.data.email);
-          toast.success(response.data.msg)
-          
-          setTimeout(() => {
-            Navigate("/home");
-          }, 3000);
-       
+        secureLocalStorage.setItem("adminemail", response.data.admin.email);
+        toast.success("Login success");
 
+        setTimeout(() => {
+          Navigate("/home");
+        }, 3000);
       })
       .catch((error) => {
         if (error.response && error.response.status === 400) {
@@ -43,10 +39,7 @@ const Login = () => {
         } else {
           toast.error("Invalid Data Entered by you.");
         }
-        
-       
       });
-     
   };
 
   let passwordicon = () => {
@@ -59,7 +52,7 @@ const Login = () => {
   };
   return (
     <div>
-    <Toaster/>
+      <Toaster />
       <div
         className="position-fixed top-0 right-0 left-0 bg-img-hero __inline-1"
         style={{
@@ -136,7 +129,8 @@ const Login = () => {
                       </span>
                     </label>
                     <div className="input-group input-group-merge iconinput">
-                      <input required
+                      <input
+                        required
                         placeholder="Password"
                         onChange={(e) => {
                           setadminpassword(e.target.value);

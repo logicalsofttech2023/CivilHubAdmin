@@ -10,7 +10,7 @@ import Pagination from "react-js-pagination"; // Import the Pagination component
 import { ColorRing } from "react-loader-spinner";
 import toast, { Toaster } from "react-hot-toast";
 
-const FreelancerList = () => {
+const ServiceProvider = () => {
   const [usersList, setUsersList] = useState([]);
   const [count, setCount] = useState();
   const [filterUsersList, setFilterUsersList] = useState([]);
@@ -19,7 +19,6 @@ const FreelancerList = () => {
   const itemsPerPage = 10;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [topFreelancerStatus, setTopFreelancerStatus] = useState(false);
 
   let token = secureLocalStorage.getItem("adminidtoken");
 
@@ -78,7 +77,7 @@ const FreelancerList = () => {
   let getUsersList = () => {
     setLoading(true);
     axios
-      .get(`${process.env.REACT_APP_API_KEY}admin/api/all_user_list`, {
+      .get(`${process.env.REACT_APP_API_KEY}admin/api/all_service_provider`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -86,12 +85,9 @@ const FreelancerList = () => {
       .then((res) => {
         console.log(res);
         const allUsers = res?.data?.data || [];
-        const freelancerUsers = allUsers.filter(
-          (user) => user.account_type === "Freelancer"
-        );
-        setCount(freelancerUsers.length);
-        setUsersList(freelancerUsers);
-        setFilterUsersList(freelancerUsers);
+        setCount(allUsers.length);
+        setUsersList(allUsers);
+        setFilterUsersList(allUsers);
         setLoading(false);
       })
       .catch((error) => {
@@ -120,6 +116,31 @@ const FreelancerList = () => {
     setActivePage(pageNumber);
   };
 
+  const handleDeleteCategory = (id) => {
+      swal({
+        title: "Are you sure?",
+        text: "Once deleted, this data cannot be recovered!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      }).then((confirm) => {
+        if (confirm) {
+          axios
+            .get(
+              `${process.env.REACT_APP_API_KEY}admin/api/service_provider_delete/${id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            )
+            .then(() => {
+              toast.success("data deleted successfully");
+              getUsersList();
+            })
+            .catch(() => {
+              toast.error("Failed to delete category");
+            });
+        }
+      });
+    };
+
   const renderUsersData = (customer, index) => {
     const adjustedIndex = (activePage - 1) * itemsPerPage + index + 1;
 
@@ -130,91 +151,33 @@ const FreelancerList = () => {
         <td>
           <div
             onClick={() =>
-              navigate("/userDetails", { state: { customerId: customer._id } })
+              navigate("/serviceProviderDetails", {
+                state: { customerId: customer._id },
+              })
             }
             className="title-color hover-c1 d-flex align-items-center gap-10"
           >
             <img
               src={
-                customer?.profile_image?.trim()
-                  ? `${process.env.REACT_APP_API_KEY}uploads/admin/${customer.profile_image}`
+                customer?.image?.trim()
+                  ? `${process.env.REACT_APP_API_KEY}uploads/admin/${customer.image}`
                   : "https://6valley.6amtech.com/public/assets/back-end/img/placeholder/user.png"
               }
               className="avatar rounded-circle"
               alt="profile"
               width={40}
             />
-            <span>
-              {customer?.first_name} {customer?.last_name || ""}
-            </span>
+            <span>{customer?.title}</span>
           </div>
         </td>
 
-        <td>
-          <div className="mb-1">
-            <strong>
-              <a
-                className="title-color hover-c1"
-                href={`mailto:${customer?.email}`}
-              >
-                {customer?.email?.length > 15
-                  ? `${customer?.email.slice(0, 15)}...`
-                  : customer?.email}
-              </a>
-            </strong>
-          </div>
-          <a className="title-color hover-c1" href={`tel:${customer?.phone}`}>
-            {customer?.phone}
-          </a>
-        </td>
+        <td>{customer?.description} </td>
 
-        <td title={customer?.address}>
-          {customer?.address
-            ? customer.address.length > 20
-              ? `${customer.address.slice(0, 20)}...`
-              : customer.address
-            : "N/A"}
-        </td>
-        <td>{customer?.experience || "0"} yr</td>
-        <td>{customer?.total_projects_done || "0"}</td>
-        <td>{customer?.rating || "0"}</td>
-        <td>
-          {customer?.verify_profile === "true" ? (
-            <span className="badge bg-success">Yes</span>
-          ) : (
-            <span className="badge bg-secondary">No</span>
-          )}
-        </td>
+        <td>{customer?.serviceprovidercat_id?.title} </td>
 
-        <td>
-          {customer?.createdAt?.slice(0, 10)}{" "}
-          {customer?.createdAt?.slice(11, 16)}
-        </td>
+        <td>{customer?.serviceprovidersubcat_id?.title} </td>
 
-        <td>
-          <div onClick={() => unblock(customer._id)} className="text-center">
-            {customer?.block_status === 1 ? (
-              <div className="btn btn-primary">Unblock</div>
-            ) : (
-              <div className="btn btn-danger">Block</div>
-            )}
-          </div>
-        </td>
-
-        <td>
-          <div
-            onClick={() =>
-              handleTopFreelancer(customer._id, !customer.topFreelancer)
-            }
-            className="text-center"
-          >
-            {customer?.topFreelancer ? (
-              <div className="btn btn-primary">Yes</div>
-            ) : (
-              <div className="btn btn-danger">No</div>
-            )}
-          </div>
-        </td>
+       
 
         <td>
           <div className="d-flex justify-content-center gap-2">
@@ -226,6 +189,23 @@ const FreelancerList = () => {
             >
               <i className="fa fa-eye" aria-hidden="true"></i>
             </Link>
+
+            <Link
+              className="btn btn-outline--primary btn-sm cursor-pointer edit"
+              to="/updateServiceProvider"
+              state={{ id: customer._id }}
+              title="Edit"
+            >
+              <i className="fa fa-pencil-square-o" aria-hidden="true" />
+            </Link>
+
+            <button
+              className="btn btn-outline-danger btn-sm"
+              title="Delete"
+              onClick={() => handleDeleteCategory(customer._id)}
+            >
+              <i className="fa fa-trash-o" aria-hidden="true" />
+            </button>
           </div>
         </td>
       </tr>
@@ -254,7 +234,7 @@ const FreelancerList = () => {
                 src="https://6valley.6amtech.com/public/assets/back-end/img/customer.png"
                 alt=""
               />
-              Freelancer List
+              Service Provider List
               <span className="badge badge-soft-dark radius-50">{count}</span>
             </h2>
           </div>
@@ -285,11 +265,11 @@ const FreelancerList = () => {
                 </div>
                 <div className="mr-2">
                   <button
-                    onClick={() => navigate("/addfreelancer")}
+                    onClick={() => navigate("/addServiceProvider")}
                     type="button"
                     className="btn btn--primary"
                   >
-                    Add Freelancer
+                    Add Service Provider
                   </button>
                 </div>
               </div>
@@ -317,16 +297,12 @@ const FreelancerList = () => {
                   <thead className="thead-light thead-50 text-capitalize">
                     <tr>
                       <th>SL</th>
-                      <th style={{ paddingRight: "100px" }}>Profile</th>
-                      <th>Contact Info</th>
-                      <th>Address</th>
-                      <th>Experience</th>
-                      <th>Projects</th>
-                      <th>Rating</th>
-                      <th>Verified</th>
-                      <th>Registered At</th>
-                      <th className="text-center">Block / Unblock</th>
-                      <th>Top Freelancer Status</th>
+                      <th>Title</th>
+                      <th>Description</th>
+                      <th>Category Name</th>
+                      <th>Sub Category Name</th>
+
+                      
                       <th className="text-center">View</th>
                     </tr>
                   </thead>
@@ -375,4 +351,4 @@ const FreelancerList = () => {
   );
 };
 
-export default FreelancerList;
+export default ServiceProvider;
